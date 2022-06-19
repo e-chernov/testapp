@@ -67,8 +67,12 @@ const App = () => {
         localStorage.setItem('notes', storageNotes);
     };
 
-    const toggleDragging = () => {
-        setTimeout(() => {setDragging(!isDragging)}, 250);
+    const onDragStart = () => {
+        setTimeout(() => {setDragging(true)}, 250);
+    };
+
+    const onDragStop = () => {
+        setTimeout(() => {setDragging(false)}, 250);
     };
 
     const onButtonClick = e => {
@@ -88,8 +92,8 @@ const App = () => {
             <h1>{`Hello, ${username}!`}</h1>
             {!!notes.length && notes.map((note, index) => (
                 <Draggable
-                    onStart={toggleDragging}
-                    onStop={toggleDragging}
+                    onStart={onDragStart}
+                    onStop={onDragStop}
                 >
                     <div>
                         <Note
