@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 const io = socketIo(server, {
     cors: {
-        origin: ["http://localhost:3000", 'http://localhost:5000', 'https://frozen-island-70548.herokuapp.com/'],
+        origin: 'https://frozen-island-70548.herokuapp.com/',
         methods: ["GET", "POST"]
     }
 });
