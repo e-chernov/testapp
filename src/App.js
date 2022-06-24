@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
 import Board from './Board';
-const ENDPOINT = "'https://frozen-island-70548.herokuapp.com':4001";
+const ENDPOINT = "https://frozen-island-70548.herokuapp.com:4001";
 
 const App = () => {
     const [response, setResponse] = useState("");
