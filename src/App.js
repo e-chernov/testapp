@@ -1,114 +1,33 @@
-import './App.css';
-import Note from './Note';
-import React, {useState, useEffect, useRef} from 'react';
-import Draggable from 'react-draggable';
+import React, { useEffect, useState } from "react";
+import socketIOClient from "socket.io-client";
+import Board from './Board';
+const ENDPOINT = "http://127.0.0.1:4001";
 
 const App = () => {
-    const [username, setUsername] = useState(null);
-    const [notes, setNotes] = useState([]);
-    const [x, setX] = useState(0);
-    const [y, setY] = useState(0);
-    const [isDragging, setDragging] = useState(false);
+    const [response, setResponse] = useState("");
+
+    const socket = socketIOClient(ENDPOINT);
+    socket.on("FromAPI", data => {
+        setResponse(data);
+    });
+    socket.on('newNote', data => {
+        console.log('!!!!!', data);
+    });
 
     useEffect(() => {
-        let name = localStorage.getItem('username');
-        if (name) {
-            setUsername(name)
-        }
-        else {
-            name = prompt('Please, enter your username');
-            setUsername(name);
-            localStorage.setItem('username', name);
-        }
-        const storageNotes = JSON.parse(localStorage.getItem('notes'));
-        if (storageNotes) {
-            setNotes(storageNotes);
-        }
+        return () => socket.disconnect();
     }, []);
 
-    const onSpaceClick = e => {
-        if (isDragging) {
-            return;
-        }
-        saveNotes([...notes, ...[{
-            username: username,
-            x: x,
-            y: y
-        }]]);
+    const onBoardChange = notes => {
+        socket.broadcast.emit('newNote', notes);
     };
-
-    const onMouseMove = e => {
-        setX(e.pageX);
-        setY(e.pageY);
-    };
-
-    const onNoteClick = (note, index, e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        if (isDragging) {
-            return;
-        }
-        const text = prompt('Please, enter a new text to the note:');
-        const newNotes = notes.map(note => note);
-        newNotes[index].text = text;
-        saveNotes(newNotes);
-        return false;
-    };
-
-    const saveNotes = notes => {
-        setNotes(notes);
-        let storageNotes;
-        if (notes.length) {
-            storageNotes = JSON.stringify(notes);
-        }
-        else {
-            storageNotes = null;
-        }
-        localStorage.setItem('notes', storageNotes);
-    };
-
-    const onDragStart = () => {
-        setTimeout(() => {setDragging(true)}, 250);
-    };
-
-    const onDragStop = () => {
-        setTimeout(() => {setDragging(false)}, 250);
-    };
-
-    const onButtonClick = e => {
-        saveNotes([]);
-        e.stopPropagation();
-    };
-
-    const noteRef = useRef();
-
 
     return (
-        <div
-            style={{width: '100%', height: window.innerHeight}}
-            onClick={onSpaceClick}
-            onMouseMove={onMouseMove}
-        >
-            <h1>{`Hello, ${username}!`}</h1>
-            {!!notes.length && notes.map((note, index) => (
-                <Draggable
-                    onStart={onDragStart}
-                    onStop={onDragStop}
-                >
-                    <div>
-                        <Note
-                            ref={noteRef}
-                            note={note}
-                            index={index}
-                            onClick={e => onNoteClick(note, index, e)}
-                        />
-                    </div>
-                </Draggable>
-            ))}
-            {!!notes.length && <button onClick={onButtonClick}>Remove all notes</button>}
+        <div>
+            It's <time dateTime={response}>{response}</time>
+            <Board onBoardChange={onBoardChange}/>
         </div>
     );
-
 };
 
 export default App;
